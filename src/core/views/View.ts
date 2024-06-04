@@ -1,17 +1,18 @@
 import { EjsRenderer } from '../../utils/ejsRenderer';
+import { html } from '../../utils/htm';
 import { Model } from '../models/Model';
 interface HasId {
   id?: number;
 }
 export abstract class View<T extends Model<K>, K extends HasId> {
-  regions: { [key: string]: Element } = {};
 
+  regions: { [key: string]: Element } = {};
   constructor(public parent: Element, public model: T, public useEjs: boolean = false) {
     this.bindModel();
   }
 
   abstract template(): string;
-
+  protected html = html;
   regionsMap(): { [key: string]: string } {
     return {};
   }
