@@ -21,11 +21,18 @@ interface HasId {
 }
 
 export class Model<T extends HasId> {
+  private defaultErrorCallback = () => {
+    console.error('An error occurred while fetching or saving data.');
+  };
+
   constructor(
     private attributes: ModelAttributes<T>,
     private events: Events,
     private sync: Sync<T>
-  ) {}
+  ) {
+    // Register the default error callback
+    this.on('error', this.defaultErrorCallback);
+  }
 
   on = this.events.on;
   trigger = this.events.trigger;
@@ -47,7 +54,9 @@ export class Model<T extends HasId> {
       (response: AxiosResponse): void => {
         this.set(response.data);
       }
-    );
+    ).catch(() => {
+      this.trigger('error');
+    });
   }
 
   save(): void {

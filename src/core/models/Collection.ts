@@ -5,7 +5,7 @@ export class Collection<T, K> {
   models: T[] = [];
   events: Eventing = new Eventing();
 
-  constructor(public rootUrl: string, public deserialize: (json: K) => T) {}
+  constructor(public rootUrl: string, public deserialize: (json: K) => T) { }
 
   get on() {
     return this.events.on;
@@ -22,6 +22,11 @@ export class Collection<T, K> {
       });
 
       this.trigger('change');
-    });
+    }).catch(this.handleError);
+  }
+
+  private handleError(error: any): void {
+    console.error('Collection Error:', error);
+    this.trigger('error');
   }
 }
