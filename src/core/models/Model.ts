@@ -40,37 +40,44 @@ export class Model<T extends HasId> {
 
   set(update: T): void {
     this.attributes.set(update);
+    console.log("TRIGGER CHANGE", this.events)
     this.events.trigger('change');
   }
 
-  fetch(): void {
+  async fetch(): Promise<void> {
     const id = this.get('id');
+    
+    console.log("MODEL_FETCH: PREVIOUS", this.toJson())
 
     if (typeof id !== 'number') {
       throw new Error('Cannot fetch without an id');
     }
 
-    this.sync.fetch(id).then(
-      (response: AxiosResponse): void => {
-        this.set(response.data);
-      }
-    ).catch(() => {
+
+    console.log("MODEL_FETCH", id, )
+    try {
+      const response = await this.sync.fetch(id);
+      console.log("MODEL_FETCH: RESPONSE", response);
+      this.set(response.data);
+      console.log("MODEL_FETCH: SET", this.toJson());
+    } catch {
       this.trigger('error');
-    });
+      throw new Error("An error occurred while fetching data");
+    }
   }
 
-  save(): void {
-    this.sync
-      .save(this.attributes.getAll())
-      .then(
-        (response: AxiosResponse): void => {
-          this.trigger('save');
-        }
-      )
-      .catch(() => {
-        this.trigger('error');
-      });
+  async save(): Promise<void> {
+    try {
+      const response = await this.sync.save(this.attributes.getAll());
+      console.log("MODEL_SAVE: RESPONSE", response);
+      this.trigger('save');
+    } catch (error) {
+      console.log("MODEL_SAVE: ERROR", error);
+      this.trigger('error');
+      throw new Error("An error occurred while saving data");
+    }
   }
+  
 
   toJson(): object {
     return this.attributes.getAll();
