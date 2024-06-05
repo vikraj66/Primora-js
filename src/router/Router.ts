@@ -4,17 +4,20 @@ export type RouteHandler = (params?: { [key: string]: string }) => void;
 
 export const routes: { [key: string]: RouteHandler } = {};
 
+export type Middleware = (params: { [key: string]: string }, next: () => void) => void;
 
 export type RouteWithCssHandler = {
     handler: RouteHandler;
     cssFilePath?: string;
     scoped?: boolean;
+    middleware?: Middleware[];
 };
 
 export class Router {
     private routes: { [key: string]: RouteWithCssHandler } = {};
     private currentRoute: string = '';
     private scopedStylesEnabled: boolean;
+    private globalMiddleware: Middleware[] = [];
 
     constructor(scopedStylesEnabled: boolean = true) {
         this.scopedStylesEnabled = scopedStylesEnabled;
@@ -30,8 +33,12 @@ export class Router {
         this.loadRoute(location.pathname);
     }
 
-    public addRoute(path: string, handler: RouteHandler, cssFilePath?: string, scoped?: boolean): void {
-        this.routes[this.normalizePath(path)] = { handler, cssFilePath, scoped }; // Normalize paths
+    public addRoute(path: string, handler: RouteHandler, cssFilePath?: string, scoped?: boolean, middleware: Middleware[] = []): void {
+        this.routes[this.normalizePath(path)] = { handler, cssFilePath, scoped, middleware };
+    }
+
+    public addGlobalMiddleware(middleware: Middleware): void {
+        this.globalMiddleware.push(middleware);
     }
 
     public navigate(path: string): void {
@@ -43,9 +50,9 @@ export class Router {
         const normalizedPath = this.normalizePath(path);
         const [route, params] = this.matchRoute(normalizedPath);
         if (route && this.routes[route]) {
-            this.currentRoute = route; // Update the current route
-            console.log(`Navigating to ${route} with params`, params); // Logging for debugging
-            const { handler, cssFilePath, scoped } = this.routes[route];
+            this.currentRoute = route;
+            console.log(`Navigating to ${route} with params`, params);
+            const { handler, cssFilePath, scoped, middleware } = this.routes[route];
             if (cssFilePath) {
                 if (this.scopedStylesEnabled && scoped !== false) {
                     const uniqueId = `route-${route.replace(/\//g, '-')}`;
@@ -54,14 +61,25 @@ export class Router {
                     this.loadCss(cssFilePath);
                 }
             }
-            handler(params);
+            this.runMiddleware(params, [...this.globalMiddleware, ...(middleware || [])], () => handler(params));
         } else {
             console.error(`Route not found: ${normalizedPath}`);
         }
     }
 
+    private runMiddleware(params: { [key: string]: string }, middleware: Middleware[], handler: () => void): void {
+        const run = (index: number) => {
+            if (index < middleware.length) {
+                middleware[index](params, () => run(index + 1));
+            } else {
+                handler();
+            }
+        };
+        run(0);
+    }
+
     private normalizePath(path: string): string {
-        return path.replace(/\/+$/, '') || '/'; // Remove trailing slashes, default to '/'
+        return path.replace(/\/+$/, '') || '/';
     }
 
     private matchRoute(path: string): [string, { [key: string]: string }] {
