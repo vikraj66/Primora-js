@@ -25,41 +25,38 @@ export class Model<T extends HasId> {
     console.error('An error occurred while fetching or saving data.');
   };
 
+  on: (eventName: string, callback: () => void) => void;
+  trigger: (eventName: string) => void;
+  get: <K extends keyof T>(key: K) => T[K];
+
   constructor(
     private attributes: ModelAttributes<T>,
     private events: Events,
     private sync: Sync<T>
   ) {
+    this.on = this.events.on;
+    this.trigger = this.events.trigger;
+    this.get = this.attributes.get;
+
     // Register the default error callback
     this.on('error', this.defaultErrorCallback);
   }
 
-  on = this.events.on;
-  trigger = this.events.trigger;
-  get = this.attributes.get;
-
   set(update: T): void {
     this.attributes.set(update);
-    console.log("TRIGGER CHANGE", this.events)
     this.events.trigger('change');
   }
 
   async fetch(): Promise<void> {
     const id = this.get('id');
-    
-    console.log("MODEL_FETCH: PREVIOUS", this.toJson())
 
     if (typeof id !== 'number') {
       throw new Error('Cannot fetch without an id');
     }
 
-
-    console.log("MODEL_FETCH", id, )
     try {
       const response = await this.sync.fetch(id);
-      console.log("MODEL_FETCH: RESPONSE", response);
       this.set(response.data);
-      console.log("MODEL_FETCH: SET", this.toJson());
     } catch {
       this.trigger('error');
       throw new Error("An error occurred while fetching data");
@@ -69,15 +66,12 @@ export class Model<T extends HasId> {
   async save(): Promise<void> {
     try {
       const response = await this.sync.save(this.attributes.getAll());
-      console.log("MODEL_SAVE: RESPONSE", response);
       this.trigger('save');
     } catch (error) {
-      console.log("MODEL_SAVE: ERROR", error);
       this.trigger('error');
       throw new Error("An error occurred while saving data");
     }
   }
-  
 
   toJson(): object {
     return this.attributes.getAll();

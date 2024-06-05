@@ -1,3 +1,6 @@
+/*
+  @jest-environment node
+*/
 import { Model } from '@/core/models/Model';
 import { Attributes } from '@/core/models/Attributes';
 import { Eventing } from '@/core/models/Eventing';

@@ -8,12 +8,19 @@ interface HasId {
     id?: number;
 }
 
+type EventHandler = (event: Event) => void;
+
 export abstract class View<T extends Model<K>, K extends HasId> {
     regions: { [key: string]: Element } = {};
     private uniqueId: string;
     private scopedStylesEnabled: boolean;
 
-    constructor(public parent: Element, public model: T, public useEjs: boolean = false, scopedStylesEnabled: boolean = true) {
+    constructor(
+        public parent: Element, 
+        public model: T, 
+        public useEjs: boolean = false, 
+        scopedStylesEnabled: boolean = false
+    ) {
         this.scopedStylesEnabled = scopedStylesEnabled;
         if (scopedStylesEnabled) {
             this.uniqueId = generateUniqueId('view');
@@ -25,11 +32,11 @@ export abstract class View<T extends Model<K>, K extends HasId> {
 
     protected html = html;
 
-     styles(): string | undefined {
+    styles(): string | undefined {
         return undefined;
-     };
+    }
 
-     cssFilePath(): string | undefined {
+    cssFilePath(): string | undefined {
         return undefined;
     }
 
@@ -37,7 +44,7 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         return {};
     }
 
-    eventsMap(): { [key: string]: () => void } {
+    eventsMap(): { [key: string]: EventHandler } {
         return {};
     }
 
@@ -78,35 +85,49 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         this.parent.innerHTML = '';
         const templateElement = document.createElement('template');
         let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
-
+    
         if (this.scopedStylesEnabled) {
             html = html.replace(/class="/g, `class="${this.uniqueId}-`);
         }
-
+    
         templateElement.innerHTML = html;
-        this.bindEvents(templateElement.content);
-        this.mapRegions(templateElement.content);
-        this.onRender();
-        this.parent.append(templateElement.content);
-
-        // Apply scoped styles from string or file
-        if (this.scopedStylesEnabled) {
-            const styles = this.styles();
-            if (styles) {
+        this.parent.append(templateElement.content); // Append the initial content first
+    
+        this.onRender(); // Call onRender to allow for dynamic content to be added
+    
+        // Create a DocumentFragment from the parent element's innerHTML
+        const fragment = document.createDocumentFragment();
+        while (this.parent.firstChild) {
+            fragment.appendChild(this.parent.firstChild);
+        }
+    
+        this.bindEvents(fragment); // Bind events to the entire fragment, including dynamically added content
+        this.mapRegions(fragment); // Map regions to the entire fragment, including dynamically added content
+    
+        this.parent.appendChild(fragment); // Append the fragment back to the parent
+    
+        // Apply styles from string
+        const styles = this.styles();
+        if (styles) {
+            if (this.scopedStylesEnabled) {
                 applyScopedStyles(this.uniqueId, styles);
             } else {
-                const cssFilePath = this.cssFilePath();
-                if (cssFilePath) {
-                    loadAndApplyScopedStyles(this.uniqueId, cssFilePath);
-                }
+                const styleElement = document.createElement('style');
+                styleElement.textContent = styles;
+                document.head.appendChild(styleElement);
             }
         } else {
+            // Apply styles from file
             const cssFilePath = this.cssFilePath();
             if (cssFilePath) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = cssFilePath;
-                document.head.appendChild(link);
+                if (this.scopedStylesEnabled) {
+                    loadAndApplyScopedStyles(this.uniqueId, cssFilePath);
+                } else {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = cssFilePath;
+                    document.head.appendChild(link);
+                }
             }
         }
     }
