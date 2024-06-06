@@ -42,9 +42,13 @@ export class Router {
     }
 
     public navigate(path: string): void {
-        history.pushState({}, '', path);
-        this.loadRoute(path);
+        const normalizedPath = this.normalizePath(path);
+        if (this.currentRoute !== normalizedPath) {
+            history.pushState({}, '', path);
+            this.loadRoute(path);
+        }
     }
+    
 
     public loadRoute(path: string): void {
         const normalizedPath = this.normalizePath(path);
