@@ -1,0 +1,38 @@
+# Node modules
+node_modules/
+
+# TypeScript source files
+src/
+
+# Build scripts and configurations
+webpack.config.js
+tsconfig.json
+jest.config.ts
+eslint.config.js
+.dts-bundle-config.json
+.dtsconfig.json
+
+# Test files
+tests/
+coverage/
+*.test.ts
+*.spec.ts
+
+# Version control directories and files
+.git/
+.gitignore
+.github/
+
+# Miscellaneous
+*.log
+npm-debug.log*
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Ignore package-lock.json if you don't want to include it
+package-lock.json
+
+
+# npmignore
+!dist/
