@@ -4,7 +4,7 @@ const config: Config.InitialOptions = {
   rootDir: __dirname,
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  testMatch: ['**/src/tests/unit/**/*.test.ts'],
+  testMatch: ['**/src/tests/**/**/*.test.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
