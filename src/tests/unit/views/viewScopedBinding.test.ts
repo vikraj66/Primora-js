@@ -65,6 +65,7 @@ describe('ViewScopedEventBinding', () => {
 
         const uniqueId = view.getUniqueId();
         const button = parentElement.querySelector(`.${uniqueId}-click-me`) as HTMLButtonElement;
+        console.info(parentElement.innerHTML)
         expect(button).not.toBeNull();
 
         button.click();
@@ -111,9 +112,7 @@ describe('ViewScopedEventBinding', () => {
 
             onRender(): void {
                 const container = this.parent.querySelector(`.container`) as HTMLElement;
-                // if (container) {
                 container.innerHTML = `<button class="dynamic-button">Dynamic Button</button>`;
-                // }
             }
         }
 
@@ -122,7 +121,7 @@ describe('ViewScopedEventBinding', () => {
         view.render();
 
         const uniqueId = view.getUniqueId();
-        const button = parentElement.querySelector(`.${view.getUniqueId()}-dynamic-button`) as HTMLButtonElement;
+        const button = parentElement.querySelector(`.${uniqueId}-dynamic-button`) as HTMLButtonElement;
         console.info(parentElement.innerHTML)
         expect(button).not.toBeNull();
 
@@ -131,6 +130,3 @@ describe('ViewScopedEventBinding', () => {
         logSpy.mockRestore();
     });
 });
-
-
-

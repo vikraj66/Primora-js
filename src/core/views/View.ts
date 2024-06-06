@@ -58,6 +58,13 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         return this.uniqueId;
     }
 
+    applyScopedClasses(element: HTMLElement): void {
+        if (this.scopedStylesEnabled) {
+            const classList = Array.from(element.classList);
+            element.className = classList.map(cls => `${this.uniqueId}-${cls}`).join(' ');
+        }
+    }
+
     bindEvents(fragment: DocumentFragment): void {
         const eventsMap = this.eventsMap();
 
@@ -96,15 +103,16 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         const templateElement = document.createElement('template');
         let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
 
-
-
         templateElement.innerHTML = html;
         this.parent.append(templateElement.content); // Append the initial content first
 
         this.onRender(); // Call onRender to allow for dynamic content to be added
+
         if (this.scopedStylesEnabled) {
-            html = html.replace(/class="/g, `class="${this.uniqueId}-`);
+            this.parent.innerHTML = this.parent.innerHTML.replace(/class="/g, `class="${this.uniqueId}-`);
         }
+
+
 
         // Create a DocumentFragment from the parent element's innerHTML
         const fragment = document.createDocumentFragment();
