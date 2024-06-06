@@ -6,13 +6,13 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "prebuild": "npm run clean", 
+    "prebuild": "rimraf dist",
     "clean": "rimraf dist",
     "compile": "tsc",
-    "generate-dts": "node generate-dts.js",
+    "generate-dts": "node generate-dts.cjs",
     "bundle": "webpack --config webpack.config.js --mode=production",
     "postbuild": "npm run cleanup",
-    "cleanup": "rimraf dist/tests dist/core dist/utils dist/router index.js.LICENSE.txt",
+    "cleanup": "rimraf dist/tests dist/core dist/utils dist/router dist/index.js.LICENSE.txt",
     "build": "npm run prebuild && npm run compile && npm run generate-dts && npm run bundle && npm run cleanup",
     "test": "jest"
   },
