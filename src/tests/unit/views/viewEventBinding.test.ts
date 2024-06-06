@@ -141,7 +141,7 @@ describe('ViewEventBinding', () => {
         }
     
         const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
-        const view = new TestView(parentElement, model);
+        const view = new TestView(parentElement, model, false , false);
         view.render();
     
         const button = parentElement.querySelector('.dynamic-button') as HTMLButtonElement;

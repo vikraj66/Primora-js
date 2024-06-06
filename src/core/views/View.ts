@@ -16,9 +16,9 @@ export abstract class View<T extends Model<K>, K extends HasId> {
     private scopedStylesEnabled: boolean;
 
     constructor(
-        public parent: Element, 
-        public model: T, 
-        public useEjs: boolean = false, 
+        public parent: Element,
+        public model: T,
+        public useEjs: boolean = false,
         scopedStylesEnabled: boolean = false
     ) {
         this.scopedStylesEnabled = scopedStylesEnabled;
@@ -54,13 +54,20 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         });
     }
 
+    getUniqueId(): string {
+        return this.uniqueId;
+    }
+
     bindEvents(fragment: DocumentFragment): void {
         const eventsMap = this.eventsMap();
 
         for (let eventKey in eventsMap) {
             const [eventName, selector] = eventKey.split(':');
+            const scopedSelector = this.scopedStylesEnabled
+                ? selector.replace(/(\.|#)([a-zA-Z0-9_-]+)/g, `$1${this.uniqueId}-$2`)
+                : selector;
 
-            fragment.querySelectorAll(selector).forEach(element => {
+            fragment.querySelectorAll(scopedSelector).forEach(element => {
                 element.addEventListener(eventName, eventsMap[eventKey]);
             });
         }
@@ -71,8 +78,11 @@ export abstract class View<T extends Model<K>, K extends HasId> {
 
         for (let key in regionsMap) {
             const selector = regionsMap[key];
-            const element = fragment.querySelector(selector);
+            const scopedSelector = this.scopedStylesEnabled
+                ? selector.replace(/(\.|#)([a-zA-Z0-9_-]+)/g, `$1${this.uniqueId}-$2`)
+                : selector;
 
+            const element = fragment.querySelector(scopedSelector);
             if (element) {
                 this.regions[key] = element;
             }
@@ -85,27 +95,28 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         this.parent.innerHTML = '';
         const templateElement = document.createElement('template');
         let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
-    
+
+
+
+        templateElement.innerHTML = html;
+        this.parent.append(templateElement.content); // Append the initial content first
+
+        this.onRender(); // Call onRender to allow for dynamic content to be added
         if (this.scopedStylesEnabled) {
             html = html.replace(/class="/g, `class="${this.uniqueId}-`);
         }
-    
-        templateElement.innerHTML = html;
-        this.parent.append(templateElement.content); // Append the initial content first
-    
-        this.onRender(); // Call onRender to allow for dynamic content to be added
-    
+
         // Create a DocumentFragment from the parent element's innerHTML
         const fragment = document.createDocumentFragment();
         while (this.parent.firstChild) {
             fragment.appendChild(this.parent.firstChild);
         }
-    
+
         this.bindEvents(fragment); // Bind events to the entire fragment, including dynamically added content
         this.mapRegions(fragment); // Map regions to the entire fragment, including dynamically added content
-    
+
         this.parent.appendChild(fragment); // Append the fragment back to the parent
-    
+
         // Apply styles from string
         const styles = this.styles();
         if (styles) {
