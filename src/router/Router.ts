@@ -48,13 +48,13 @@ export class Router {
             this.loadRoute(path);
         }
     }
-    
+
 
     public loadRoute(path: string): void {
         const normalizedPath = this.normalizePath(path);
-        const [route, params] = this.matchRoute(normalizedPath);
+        const [route, params] = this.matchRoute(normalizedPath.split('?')[0].split('#')[0]);
         if (route && this.routes[route]) {
-            this.currentRoute = route;
+            this.currentRoute = normalizedPath;
             console.log(`Navigating to ${route} with params`, params);
             const { handler, cssFilePath, scoped, middleware } = this.routes[route];
             if (cssFilePath) {
@@ -71,6 +71,7 @@ export class Router {
         }
     }
 
+
     private runMiddleware(params: { [key: string]: string }, middleware: Middleware[], handler: () => void): void {
         const run = (index: number) => {
             if (index < middleware.length) {
@@ -83,8 +84,10 @@ export class Router {
     }
 
     private normalizePath(path: string): string {
-        return path.replace(/\/+$/, '') || '/';
+        const basePath = path.split('?')[0].split('#')[0];
+        return basePath.replace(/\/+$/, '') || '/';
     }
+
 
     private matchRoute(path: string): [string, { [key: string]: string }] {
         for (const route of Object.keys(this.routes)) {
