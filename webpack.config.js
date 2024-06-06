@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import TerserPlugin from 'terser-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import pathBrowserify from 'path-browserify';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,12 +15,15 @@ export default {
         libraryTarget: 'umd',
         globalObject: 'this',
     },
+    mode: 'production', // Set mode to production or development
     resolve: {
         extensions: ['.ts', '.js'],
         fallback: {
             "http": 'stream-http',
             "buffer": 'buffer',
-            "url": 'url'
+            "url": 'url',
+            "path": 'path-browserify',
+            "fs": false // Mock fs module with an empty object
         }
     },
     module: {

@@ -1,16 +1,20 @@
 {
-  "name": "primora-js",
-  "version": "3.0.0",
+  "name": "wayofjs",
+  "version": "1.0.0",
   "description": "A library for managing models and views",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm test",
-    "preversion": "npm run test",
-    "version": "npm run build && git add -A dist"
+    "prebuild": "npm run clean", 
+    "clean": "rimraf dist",
+    "compile": "tsc",
+    "generate-dts": "node generate-dts.js",
+    "bundle": "webpack --config webpack.config.js --mode=production",
+    "postbuild": "npm run cleanup",
+    "cleanup": "rimraf dist/tests dist/core dist/utils dist/router index.js.LICENSE.txt",
+    "build": "npm run prebuild && npm run compile && npm run generate-dts && npm run bundle && npm run cleanup",
+    "test": "jest"
   },
   "author": "Vikash Kumar",
   "license": "MIT",
@@ -23,8 +27,13 @@
   ],
   "dependencies": {
     "axios": "^1.7.2",
+    "browserify-fs": "^1.0.0",
+    "buffer": "^6.0.3",
     "ejs": "^3.1.10",
-    "htm": "^3.1.1"
+    "htm": "^3.1.1",
+    "path-browserify": "^1.0.1",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.24.6",
@@ -33,9 +42,11 @@
     "@babel/preset-typescript": "^7.24.6",
     "@types/ejs": "^3.1.5",
     "@types/jest": "^29.5.12",
+    "@types/path-browserify": "^1.0.2",
     "axios-mock-adapter": "^1.22.0",
     "babel-jest": "^29.7.0",
     "clean-webpack-plugin": "^4.0.0",
+    "dts-bundle-generator": "^9.5.1",
     "esm": "^3.2.25",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -43,6 +54,7 @@
     "jest-transform-stub": "^2.0.0",
     "jsdom": "^24.1.0",
     "process": "^0.11.10",
+    "rimraf": "^5.0.7",
     "terser-webpack-plugin": "^5.3.10",
     "ts-jest": "^29.1.4",
     "ts-loader": "^9.5.1",
