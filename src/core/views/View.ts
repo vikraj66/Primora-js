@@ -28,7 +28,7 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         this.bindModel();
     }
 
-    abstract template(): string | HTMLTemplateElement;
+    abstract template(): string | HTMLElement;
 
     protected html = html;
 
