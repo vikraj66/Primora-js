@@ -114,7 +114,13 @@ export abstract class View<T extends Model<K>, K extends HasId> {
                 templateElement.innerHTML = templateContent;
                 this.parent.append(templateElement.content);
             } else {
-                this.parent.append(templateContent);
+                if (Array.isArray(templateContent)) {
+                    templateContent.forEach(element => {
+                        this.parent.append(element);
+                    });
+                } else {
+                    this.parent.append(templateContent);
+                }
             }
         }
 
