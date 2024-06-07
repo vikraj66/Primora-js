@@ -17,10 +17,18 @@ export const html = htm.bind((tag: string, props: any, ...children: any[]) => {
     }
 
     children.forEach(child => {
-        if (typeof child === 'string') {
-            element.textContent += child;
-        } else {
+        if (typeof child === 'string' || typeof child === 'number' || typeof child === 'boolean') {
+            element.appendChild(document.createTextNode(child.toString()));
+        } else if (child instanceof Node) {
             element.appendChild(child);
+        } else if (Array.isArray(child)) {
+            child.forEach(nestedChild => {
+                if (typeof nestedChild === 'string' || typeof nestedChild === 'number' || typeof nestedChild === 'boolean') {
+                    element.appendChild(document.createTextNode(nestedChild.toString()));
+                } else if (nestedChild instanceof Node) {
+                    element.appendChild(nestedChild);
+                }
+            });
         }
     });
 

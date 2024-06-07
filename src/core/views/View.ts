@@ -129,7 +129,6 @@ export abstract class View<T extends Model<K>, K extends HasId> {
             this.parent.innerHTML = this.parent.innerHTML.replace(/class="/g, `class="${this.uniqueId}-`);
         }
 
-        // Create a DocumentFragment from the parent element's innerHTML
         const fragment = document.createDocumentFragment();
         while (this.parent.firstChild) {
             fragment.appendChild(this.parent.firstChild);
@@ -151,7 +150,6 @@ export abstract class View<T extends Model<K>, K extends HasId> {
                 document.head.appendChild(styleElement);
             }
         } else {
-            // Apply styles from file
             const cssFilePath = this.cssFilePath();
             if (cssFilePath) {
                 if (this.scopedStylesEnabled) {
