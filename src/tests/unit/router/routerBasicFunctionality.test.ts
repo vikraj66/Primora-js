@@ -1,6 +1,6 @@
 // routerBasicFunctionality.test.ts
 
-import { Router, RouteHandler, Middleware } from '@/router';
+import { Router, RouteHandler, Middleware } from '@/router/Router';
 import { loadAndApplyScopedStyles } from '@/utils/scopedStyles';
 
 jest.mock('@/utils/scopedStyles', () => ({
