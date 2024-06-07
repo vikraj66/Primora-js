@@ -28,7 +28,7 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         this.bindModel();
     }
 
-    abstract template(): string;
+    abstract template(): string | HTMLTemplateElement;
 
     protected html = html;
 
@@ -100,11 +100,29 @@ export abstract class View<T extends Model<K>, K extends HasId> {
 
     render(): void {
         this.parent.innerHTML = '';
-        const templateElement = document.createElement('template');
-        let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
 
-        templateElement.innerHTML = html;
-        this.parent.append(templateElement.content); // Append the initial content first
+        const templateContent = this.template();
+
+        if (this.useEjs === true && typeof templateContent === 'string') {
+            const renderedHtml = EjsRenderer.render(templateContent, this.model.toJson());
+            const template = document.createElement('template');
+            template.innerHTML = renderedHtml;
+            this.parent.append(template.content);
+        } else {
+            if (typeof templateContent === 'string') {
+                const templateElement = document.createElement('template');
+                templateElement.innerHTML = templateContent;
+                this.parent.append(templateElement.content);
+            } else {
+                this.parent.append(templateContent);
+            }
+        }
+
+        // const templateElement = document.createElement('template');
+        // let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
+
+        // templateElement.innerHTML = html;
+        // this.parent.append(templateElement.content); // Append the initial content first
 
         this.onRender(); // Call onRender to allow for dynamic content to be added
 
