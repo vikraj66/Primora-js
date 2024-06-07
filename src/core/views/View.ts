@@ -98,6 +98,8 @@ export abstract class View<T extends Model<K>, K extends HasId> {
 
     onRender(): void { }
 
+    afterRender(): void { }
+
     render(): void {
         this.parent.innerHTML = '';
 
@@ -162,5 +164,7 @@ export abstract class View<T extends Model<K>, K extends HasId> {
                 }
             }
         }
+
+        this.afterRender();
     }
 }
