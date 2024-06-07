@@ -102,41 +102,32 @@ export abstract class View<T extends Model<K>, K extends HasId> {
         this.parent.innerHTML = '';
 
         const templateContent = this.template();
+        let elements: Node[] = [];
 
         if (this.useEjs === true && typeof templateContent === 'string') {
             const renderedHtml = EjsRenderer.render(templateContent, this.model.toJson());
             const template = document.createElement('template');
             template.innerHTML = renderedHtml;
-            this.parent.append(template.content);
+            elements = Array.from(template.content.childNodes);
         } else {
             if (typeof templateContent === 'string') {
                 const templateElement = document.createElement('template');
                 templateElement.innerHTML = templateContent;
-                this.parent.append(templateElement.content);
+                elements = Array.from(templateElement.content.childNodes);
+            } else if (Array.isArray(templateContent)) {
+                elements = templateContent;
             } else {
-                if (Array.isArray(templateContent)) {
-                    templateContent.forEach(element => {
-                        this.parent.append(element);
-                    });
-                } else {
-                    this.parent.append(templateContent);
-                }
+                elements = [templateContent];
             }
         }
 
-        // const templateElement = document.createElement('template');
-        // let html = this.useEjs ? EjsRenderer.render(this.template(), this.model.toJson()) : this.template();
-
-        // templateElement.innerHTML = html;
-        // this.parent.append(templateElement.content); // Append the initial content first
+        elements.forEach(element => this.parent.appendChild(element));
 
         this.onRender(); // Call onRender to allow for dynamic content to be added
 
         if (this.scopedStylesEnabled) {
             this.parent.innerHTML = this.parent.innerHTML.replace(/class="/g, `class="${this.uniqueId}-`);
         }
-
-
 
         // Create a DocumentFragment from the parent element's innerHTML
         const fragment = document.createDocumentFragment();
