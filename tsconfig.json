@@ -1,17 +1,31 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "target": "es2016",
+    "module": "ESNext",
     "lib": ["es2015", "dom"],
     "declaration": true,
+    "declarationDir": "./dist",
+    "declarationMap": false,
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["*"]
     },
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "plugins": [
+      {
+        "transform": "ts-transform-paths",
+        "afterDeclarations": true
+      }
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "src/test"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "src/test", "examples", "tests", "src/tests"]
 }
