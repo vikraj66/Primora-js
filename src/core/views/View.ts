@@ -61,9 +61,12 @@ export abstract class View<T extends Model<K>, K extends HasId> {
     applyScopedClasses(element: HTMLElement): void {
         if (this.scopedStylesEnabled) {
             const classList = Array.from(element.classList);
-            element.className = classList.map(cls => `${this.uniqueId}-${cls}`).join(' ');
+            element.className = classList.map(cls => 
+                cls.startsWith(`${this.uniqueId}-`) ? cls : `${this.uniqueId}-${cls}`
+            ).join(' ');
         }
     }
+    
     applyScopedClassesToAll(element: HTMLElement): void {
         if (this.scopedStylesEnabled) {
             this.applyScopedClasses(element);
@@ -73,6 +76,7 @@ export abstract class View<T extends Model<K>, K extends HasId> {
             });
         }
     }
+    
     
 
     bindEvents(fragment: DocumentFragment): void {
