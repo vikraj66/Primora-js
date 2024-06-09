@@ -4,7 +4,7 @@ export type RouteHandler = (params?: { [key: string]: string }) => void;
 
 export const routes: { [key: string]: RouteHandler } = {};
 
-export type Middleware = (params: { [key: string]: string }, next: () => void) => void;
+export type Middleware = (params: { [key: string]: string }, next: () => void) => void | Promise<void>;
 
 export type RouteWithCssHandler = {
     handler: RouteHandler;
@@ -49,7 +49,6 @@ export class Router {
         }
     }
 
-
     public loadRoute(path: string): void {
         const normalizedPath = this.normalizePath(path);
         const [route, params] = this.matchRoute(normalizedPath.split('?')[0].split('#')[0]);
@@ -71,23 +70,21 @@ export class Router {
         }
     }
 
-
-    private runMiddleware(params: { [key: string]: string }, middleware: Middleware[], handler: () => void): void {
-        const run = (index: number) => {
+    private async runMiddleware(params: { [key: string]: string }, middleware: Middleware[], handler: () => void): Promise<void> {
+        const run = async (index: number) => {
             if (index < middleware.length) {
-                middleware[index](params, () => run(index + 1));
+                await middleware[index](params, () => run(index + 1));
             } else {
                 handler();
             }
         };
-        run(0);
+        await run(0);
     }
 
     private normalizePath(path: string): string {
         const basePath = path.split('?')[0].split('#')[0];
         return basePath.replace(/\/+$/, '') || '/';
     }
-
 
     private matchRoute(path: string): [string, { [key: string]: string }] {
         for (const route of Object.keys(this.routes)) {

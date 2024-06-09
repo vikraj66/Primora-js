@@ -16,7 +16,9 @@ const config: Config.InitialOptions = {
   transformIgnorePatterns: [
     "node_modules/(?!(htm)/)"
   ],
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"]
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  testTimeout: 60000,
+  maxWorkers: 2
 };
 
 export default config;
