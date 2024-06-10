@@ -11,6 +11,7 @@ jest.config.ts
 eslint.config.js
 .dts-bundle-config.json
 .dtsconfig.json
+build.js
 
 # Test files
 tests/
@@ -36,3 +37,6 @@ package-lock.json
 
 # npmignore
 !dist/
+fix-import.cjs
+generate-dts.cjs
+babel.config.cjs
