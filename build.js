@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { mkdirSync, readdirSync, copyFileSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { generateDtsBundle } from 'dts-bundle-generator';
@@ -8,15 +8,20 @@ import { generateDtsBundle } from 'dts-bundle-generator';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Build the project
+// Build the project for the browser
 build({
   entryPoints: ['src/index.ts'],
   bundle: true,
-  platform: 'node',
-  format: 'cjs',  // Change format to 'cjs'
-  outfile: 'dist/bundle.cjs',
+  platform: 'browser',
+  format: 'esm',  // Change format to 'esm' for browser compatibility
+  outfile: 'dist/bundle.js',
   sourcemap: true,
-  external: ['node_modules/*'],
+  external: ['fs', 'path', 'ejs'], // Exclude Node.js built-in modules and ejs
+  target: ['es6'],  // Target modern browsers
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    'process.browser': 'true',
+  },
 }).catch(() => process.exit(1));
 
 // Generate a single .d.ts bundle
